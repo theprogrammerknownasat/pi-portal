@@ -70,8 +70,7 @@ apt install -y \
     curl \
     wget \
     zenity \
-    imagemagick \
-    adwaita-qt-theme
+    imagemagick 
 
 print_success "Base packages installed"
 
