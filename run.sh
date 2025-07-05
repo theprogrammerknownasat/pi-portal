@@ -70,7 +70,7 @@ apt install -y \
     curl \
     wget \
     zenity \
-    imagemagick 
+    imagemagick
 
 print_success "Base packages installed"
 
@@ -316,7 +316,7 @@ while true; do
 done
 
 while true; do
-    read -s -p "Enter WiFi password: " WIFI_PASSWORD
+    read -p "Enter WiFi password: " WIFI_PASSWORD
     echo ""
     if [ -n "$WIFI_PASSWORD" ]; then
         break
@@ -330,13 +330,7 @@ print_info "Configuring WiFi connection for: $WIFI_SSID"
 nmcli connection delete "appliance-wifi" 2>/dev/null || true
 
 # Create new WiFi connection
-nmcli connection add \
-    type wifi \
-    con-name "appliance-wifi" \
-    ifname wlan0 \
-    ssid "$WIFI_SSID" \
-    wifi-sec.key-mgmt wpa-psk \
-    wifi-sec.psk "$WIFI_PASSWORD"
+nmcli device wifi connect "$WIFI_SSID" password "$WIFI_PASSWORD" name "appliance-wifi"
 
 # Set to auto-connect with high priority
 nmcli connection modify "appliance-wifi" connection.autoconnect yes
