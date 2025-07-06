@@ -70,7 +70,8 @@ apt install -y \
     curl \
     wget \
     zenity \
-    imagemagick 
+    imagemagick \
+    adwaita-qt-theme
 
 print_success "Base packages installed"
 
@@ -347,6 +348,22 @@ done
 
 print_info "Configuring WiFi connection for: $WIFI_SSID"
 
+# Remove any existing connection with the same name
+nmcli connection delete "appliance-wifi" 2>/dev/null || true
+
+# Create new WiFi connection
+nmcli device wifi connect "$WIFI_SSID" password "$WIFI_PASSWORD" name "appliance-wifi"
+
+# Set to auto-connect with high priority
+nmcli connection modify "appliance-wifi" connection.autoconnect yes
+nmcli connection modify "appliance-wifi" connection.autoconnect-priority 100
+
+print_info "Testing WiFi connection..."
+if nmcli connection up "appliance-wifi" 2>/dev/null; then
+    print_success "WiFi connection test successful"
+else
+    print_warning "WiFi connection test failed - please verify credentials later"
+fi
 
 # =============================================================================
 # MOONLIGHT SERVER CONFIGURATION
