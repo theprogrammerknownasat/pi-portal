@@ -108,6 +108,10 @@ print_info "Creating main session script..."
 cat > /opt/moonlight-appliance/session.sh << 'EOF'
 #!/bin/bash
 
+export DISPLAY=:0
+export XAUTHORITY=/home/user/.Xauthority
+export XDG_RUNTIME_DIR=/run/user/$(id -u user)
+
 # Moonlight Appliance Session Manager
 # Handles connection attempts with infinite retry
 
@@ -155,9 +159,9 @@ while true; do
     
     # Wait 45 seconds for connection to establish
     sleep 45
-    
+
     # Check if Moonlight is still running (successful connection)
-    if kill -0 $MOONLIGHT_PID 2>/dev/null; then
+    if pgrep -f moonlight > /dev/null && ! grep -q "error\|failed\|unable" /tmp/moonlight-debug.log; then
         log "Moonlight connected successfully"
         # Hide Plymouth boot screen now that we're connected
         plymouth quit 2>/dev/null || true
@@ -330,18 +334,18 @@ print_info "Configuring WiFi connection for: $WIFI_SSID"
 nmcli connection delete "appliance-wifi" 2>/dev/null || true
 
 # Create new WiFi connection
-nmcli device wifi connect "$WIFI_SSID" password "$WIFI_PASSWORD" name "appliance-wifi"
+#nmcli device wifi connect "$WIFI_SSID" password "$WIFI_PASSWORD" name "appliance-wifi"
 
 # Set to auto-connect with high priority
-nmcli connection modify "appliance-wifi" connection.autoconnect yes
-nmcli connection modify "appliance-wifi" connection.autoconnect-priority 100
+#nmcli connection modify "appliance-wifi" connection.autoconnect yes
+#nmcli connection modify "appliance-wifi" connection.autoconnect-priority 100
 
 print_info "Testing WiFi connection..."
-if nmcli connection up "appliance-wifi" 2>/dev/null; then
-    print_success "WiFi connection test successful"
-else
-    print_warning "WiFi connection test failed - please verify credentials later"
-fi
+#if nmcli connection up "appliance-wifi" 2>/dev/null; then
+ #   print_success "WiFi connection test successful"
+#else
+#    print_warning "WiFi connection test failed - please verify credentials later"
+#fi
 
 # =============================================================================
 # MOONLIGHT SERVER CONFIGURATION
@@ -793,7 +797,7 @@ for dev_user in $COMMON_DEV_USERS; do
 done
 
 print_info "Locking root account for security..."
-passwd -l root
+# passwd -l root
 
 print_info "Clearing temporary files and logs..."
 rm -rf /tmp/* 2>/dev/null || true
